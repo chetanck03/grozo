@@ -1,0 +1,139 @@
+**Privacy Policy — Grozo**
+
+**Last updated:** February 2026
+
+Welcome to **Grozo – Smart Grocery Shopping App**.
+This Privacy Policy explains how we collect, use, and protect your information when you use our mobile application.
+
+---
+
+## 1. Information We Collect
+
+We may collect the following types of information:
+
+**a) Grocery & App Data**
+
+* Grocery items you add
+* Quantities & categories
+* Meal plans & preferences
+* Shopping history
+
+**b) Usage Data**
+
+* App interactions
+* Feature usage
+* Crash logs & performance data
+
+**c) Device Information**
+
+* Device model
+* OS version
+* App version
+
+**d) Login Information (if applicable)**
+If you sign in using Google or other authentication methods, we may collect:
+
+* Name
+* Email address
+* Profile photo (optional)
+
+---
+
+## 2. How We Use Your Information
+
+We use collected data to:
+
+* Provide grocery list features
+* Enable AI meal planning
+* Generate smart suggestions
+* Sync data across devices
+* Improve app performance
+* Provide customer support
+
+---
+
+## 3. Data Storage & Security
+
+* Your data is primarily stored locally on your device.
+* Cloud storage may be used for backup & sync.
+* We implement industry-standard security measures to protect your data.
+
+---
+
+## 4. Third-Party Services
+
+Grozo may use trusted third-party services such as:
+
+* AI meal planning providers
+* Cloud database services
+* Analytics tools
+* Authentication providers (e.g., Google Sign-In)
+
+These services process data only to provide app functionality.
+
+---
+
+## 5. Data Sharing
+
+We **do not sell or rent** your personal data.
+
+We may share data only:
+
+* With your consent
+* For legal compliance
+* To protect rights & safety
+* With service providers under confidentiality agreements
+
+---
+
+## 6. Your Rights
+
+You can:
+
+* Access your data
+* Export grocery lists
+* Delete all app data
+* Disable AI features
+* Contact us for data requests
+
+---
+
+## 7. Children’s Privacy
+
+Grozo is not intended for children under 13.
+We do not knowingly collect data from children.
+
+---
+
+## 8. International Data Transfers
+
+Your data may be processed on servers outside your country.
+We ensure appropriate data protection safeguards.
+
+---
+
+## 9. Data Retention
+
+We retain data only as long as necessary.
+You can delete your data anytime from the app.
+
+---
+
+## 10. Policy Updates
+
+We may update this policy periodically.
+Changes will be reflected by updating the “Last updated” date.
+
+---
+
+## 11. Contact Us
+
+If you have questions:
+
+**Developer:** Ck Tech Hub
+**Email:** [support@cktechhub.dev](mailto:support@cktechhub.dev)
+**App:** Grozo – Smart Grocery Shopping
+
+---
+
+**Grozo** — Smart Grocery Shopping Made Easy

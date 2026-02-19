@@ -17,7 +17,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.grozo.app",
+      "bundleIdentifier": "com.grozo.smartlist",
       "infoPlist": {
         "NSUserNotificationsUsageDescription": "This app uses notifications to remind you about low stock items and shopping reminders."
       }
@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#22c55e"
       },
-      "package": "com.grozo.app",
+      "package": "com.grozo.smartlist",
       "permissions": [
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.VIBRATE",
