@@ -1,12 +1,14 @@
-import "./global.css"
-import { Text, View } from "react-native";
- 
+import "./global.css";
+import React from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AppNavigator } from './src/navigation/AppNavigator';
+
 export default function App() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-xl font-bold text-blue-500">
-        Welcome to Nativewind!
-      </Text>
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppNavigator />
+      <StatusBar style="dark" backgroundColor="#f9fafb" />
+    </GestureHandlerRootView>
   );
 }
