@@ -27,8 +27,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#22c55e"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
       "package": "com.grozo.app",
       "permissions": [
         "android.permission.RECEIVE_BOOT_COMPLETED",
@@ -52,20 +50,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "14a9eae4-cc12-4cae-b7c4-4d6c1107de51"
+        "projectId": "862659b2-93ba-4111-b1f4-238218be63db"
       }
     },
-    "hooks": {
-      "postPublish": [
-        {
-          "file": "sentry-expo/upload-sourcemaps",
-          "config": {
-            "organization": "grozo",
-            "project": "grozo-app"
-          }
-        }
-      ]
-    },
-    "owner": "cktechhub"
+    "owner": "dev-ck"
   }
 }
