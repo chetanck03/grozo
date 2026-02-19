@@ -52,8 +52,20 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "14a9eae4-cc12-4cae-b7c4-4d6c1107de51"
       }
-    }
+    },
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "grozo",
+            "project": "grozo-app"
+          }
+        }
+      ]
+    },
+    "owner": "cktechhub"
   }
 }

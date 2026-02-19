@@ -10,14 +10,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NavigationProp } from '@react-navigation/native';
 import { useGroceryStore } from '../store/groceryStore';
 import { GroceryItem } from '../components/GroceryItem';
 import { CategoryCard } from '../components/CategoryCard';
-import { RootStackParamList } from '../types';
+import { RootStackParamList, TabParamList } from '../types';
 import { GeminiService } from '../services/geminiService';
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+type HomeScreenNavigationProp = NavigationProp<RootStackParamList>;
 
 export const HomeScreen: React.FC = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
@@ -68,12 +68,15 @@ export const HomeScreen: React.FC = () => {
               Smart grocery shopping made easy
             </Text>
           </View>
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('MealPlanner')}
-            className="bg-green-500 p-3 rounded-full"
-          >
-            <Ionicons name="restaurant" size={24} color="white" />
-          </TouchableOpacity>
+          <View className="items-center">
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('MealPlanner', undefined)}
+              className="bg-green-500 p-3 rounded-full"
+            >
+              <Ionicons name="sparkles" size={24} color="white" />
+            </TouchableOpacity>
+            <Text className="text-xs text-gray-700 font-semibold mt-1">AI Planner</Text>
+          </View>
         </View>
 
         {/* Search Bar */}
@@ -100,11 +103,10 @@ export const HomeScreen: React.FC = () => {
           {/* Suggestions Dropdown */}
           {showSuggestions && suggestions.length > 0 && (
             <View className="absolute top-full left-0 right-0 bg-white rounded-xl shadow-lg mt-1 z-10 max-h-48">
-              <FlatList
-                data={suggestions}
-                keyExtractor={(item, index) => `${item}-${index}`}
-                renderItem={({ item }) => (
+              <ScrollView nestedScrollEnabled={true}>
+                {suggestions.map((item, index) => (
                   <TouchableOpacity
+                    key={`${item}-${index}`}
                     className="px-4 py-3 border-b border-gray-100"
                     onPress={() => {
                       navigation.navigate('AddItem', { category: undefined });
@@ -114,8 +116,8 @@ export const HomeScreen: React.FC = () => {
                   >
                     <Text className="text-gray-800">{item}</Text>
                   </TouchableOpacity>
-                )}
-              />
+                ))}
+              </ScrollView>
             </View>
           )}
         </View>
@@ -135,18 +137,18 @@ export const HomeScreen: React.FC = () => {
         {/* Quick Actions */}
         <View className="flex-row mb-6">
           <TouchableOpacity
-            onPress={() => navigation.navigate('AddItem')}
+            onPress={() => navigation.navigate('AddItem', { category: undefined })}
             className="flex-1 bg-green-500 rounded-xl p-4 mr-2 flex-row items-center justify-center"
           >
             <Ionicons name="add" size={24} color="white" />
             <Text className="text-white font-semibold ml-2">Add Item</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => navigation.navigate('FamilyLists')}
+            onPress={() => navigation.navigate('MyLists', undefined)}
             className="flex-1 bg-blue-500 rounded-xl p-4 ml-2 flex-row items-center justify-center"
           >
             <Ionicons name="people" size={24} color="white" />
-            <Text className="text-white font-semibold ml-2">Family Lists</Text>
+            <Text className="text-white font-semibold ml-2">My Lists</Text>
           </TouchableOpacity>
         </View>
 

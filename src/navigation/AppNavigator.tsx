@@ -12,7 +12,9 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { AddItemScreen } from '../screens/AddItemScreen';
 import { EditItemScreen } from '../screens/EditItemScreen';
 import { MealPlannerScreen } from '../screens/MealPlannerScreen';
-import { FamilyListsScreen } from '../screens/FamilyListsScreen';
+import { MyListsScreen } from '../screens/MyListsScreen';
+import { PrivacyPolicyScreen } from '../screens/PrivacyPolicyScreen';
+import { HelpSupportScreen } from '../screens/HelpSupportScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -111,8 +113,22 @@ export const AppNavigator = () => {
           }}
         />
         <Stack.Screen 
-          name="FamilyLists" 
-          component={FamilyListsScreen}
+          name="MyLists" 
+          component={MyListsScreen}
+          options={{
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen 
+          name="PrivacyPolicy" 
+          component={PrivacyPolicyScreen}
+          options={{
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen 
+          name="HelpSupport" 
+          component={HelpSupportScreen}
           options={{
             presentation: 'modal',
           }}

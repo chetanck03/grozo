@@ -27,21 +27,22 @@ export interface MealPlan {
   createdAt: Date;
 }
 
-export interface FamilyList {
+export interface MyList {
   id: string;
   name: string;
-  members: string[];
   items: GroceryItem[];
-  createdBy: string;
   createdAt: Date;
+  color: string;
 }
 
 export type RootStackParamList = {
   MainTabs: undefined;
-  AddItem: { category?: string };
+  AddItem: { category?: string; listId?: string };
   EditItem: { item: GroceryItem };
   MealPlanner: undefined;
-  FamilyLists: undefined;
+  MyLists: undefined;
+  PrivacyPolicy: undefined;
+  HelpSupport: undefined;
 };
 
 export type TabParamList = {

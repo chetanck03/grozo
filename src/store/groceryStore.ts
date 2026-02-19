@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import { GroceryItem, GroceryCategory, MealPlan, FamilyList } from '../types';
+import { GroceryItem, GroceryCategory, MealPlan, MyList } from '../types';
 
 interface GroceryStore {
   items: GroceryItem[];
   categories: GroceryCategory[];
   mealPlans: MealPlan[];
-  familyLists: FamilyList[];
+  myLists: MyList[];
   suggestions: string[];
   
   // Actions
@@ -24,9 +24,15 @@ interface GroceryStore {
   // AI Suggestions
   updateSuggestions: (query: string) => void;
   
-  // Family Lists
-  createFamilyList: (name: string, createdBy: string) => void;
-  addItemToFamilyList: (listId: string, item: Omit<GroceryItem, 'id' | 'addedAt'>) => void;
+  // My Lists
+  createMyList: (name: string, color: string) => void;
+  deleteMyList: (listId: string) => void;
+  addItemToMyList: (listId: string, item: Omit<GroceryItem, 'id' | 'addedAt'>) => void;
+  removeItemFromMyList: (listId: string, itemId: string) => void;
+  toggleMyListItemComplete: (listId: string, itemId: string) => void;
+  
+  // Clear all data
+  clearAllData: () => void;
 }
 
 const defaultCategories: GroceryCategory[] = [
@@ -40,6 +46,8 @@ const defaultCategories: GroceryCategory[] = [
   { id: '8', name: 'Snacks', icon: '🍿', color: '#f97316' },
 ];
 
+const listColors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#10b981', '#f97316'];
+
 const commonSuggestions = [
   'Milk', 'Bread', 'Eggs', 'Bananas', 'Apples', 'Chicken', 'Rice', 'Pasta',
   'Tomatoes', 'Onions', 'Potatoes', 'Cheese', 'Yogurt', 'Butter', 'Salt',
@@ -50,13 +58,13 @@ export const useGroceryStore = create<GroceryStore>((set, get) => ({
   items: [],
   categories: defaultCategories,
   mealPlans: [],
-  familyLists: [],
+  myLists: [],
   suggestions: commonSuggestions,
 
   addItem: (item) => set((state) => ({
     items: [...state.items, {
       ...item,
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       addedAt: new Date(),
     }]
   })),
@@ -80,14 +88,14 @@ export const useGroceryStore = create<GroceryStore>((set, get) => ({
   addCategory: (category) => set((state) => ({
     categories: [...state.categories, {
       ...category,
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     }]
   })),
 
   addMealPlan: (mealPlan) => set((state) => ({
     mealPlans: [...state.mealPlans, {
       ...mealPlan,
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date(),
     }]
   })),
@@ -118,29 +126,64 @@ export const useGroceryStore = create<GroceryStore>((set, get) => ({
     set({ suggestions: filtered });
   },
 
-  createFamilyList: (name, createdBy) => set((state) => ({
-    familyLists: [...state.familyLists, {
-      id: Date.now().toString(),
+  createMyList: (name, color) => set((state) => ({
+    myLists: [...state.myLists, {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name,
-      members: [createdBy],
       items: [],
-      createdBy,
       createdAt: new Date(),
+      color,
     }]
   })),
 
-  addItemToFamilyList: (listId, item) => set((state) => ({
-    familyLists: state.familyLists.map(list =>
+  deleteMyList: (listId) => set((state) => ({
+    myLists: state.myLists.filter(list => list.id !== listId)
+  })),
+
+  addItemToMyList: (listId, item) => set((state) => ({
+    myLists: state.myLists.map(list =>
       list.id === listId
         ? {
             ...list,
             items: [...list.items, {
               ...item,
-              id: Date.now().toString(),
+              id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               addedAt: new Date(),
             }]
           }
         : list
     )
+  })),
+
+  removeItemFromMyList: (listId, itemId) => set((state) => ({
+    myLists: state.myLists.map(list =>
+      list.id === listId
+        ? {
+            ...list,
+            items: list.items.filter(item => item.id !== itemId)
+          }
+        : list
+    )
+  })),
+
+  toggleMyListItemComplete: (listId, itemId) => set((state) => ({
+    myLists: state.myLists.map(list =>
+      list.id === listId
+        ? {
+            ...list,
+            items: list.items.map(item =>
+              item.id === itemId ? { ...item, isCompleted: !item.isCompleted } : item
+            )
+          }
+        : list
+    )
+  })),
+
+  clearAllData: () => set(() => ({
+    items: [],
+    mealPlans: [],
+    myLists: [],
+    categories: defaultCategories, // Keep default categories
+    suggestions: commonSuggestions, // Keep default suggestions
   })),
 }));

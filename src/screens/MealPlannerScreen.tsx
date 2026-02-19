@@ -16,7 +16,7 @@ import { useGroceryStore } from '../store/groceryStore';
 import { RootStackParamList } from '../types';
 import { GeminiService } from '../services/geminiService';
 
-type MealPlannerScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+type MealPlannerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MealPlanner'>;
 
 export const MealPlannerScreen: React.FC = () => {
   const navigation = useNavigation<MealPlannerScreenNavigationProp>();
@@ -25,31 +25,66 @@ export const MealPlannerScreen: React.FC = () => {
   const [preferences, setPreferences] = useState('');
   const [servings, setServings] = useState('4');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedPresets, setSelectedPresets] = useState<string[]>([]);
+
+  // Preset meal preferences
+  const dietaryPresets = [
+    'Vegetarian', 'Vegan', 'Keto', 'Low-carb', 'Gluten-free', 'Dairy-free'
+  ];
+  
+  const cuisinePresets = [
+    'Italian', 'Mexican', 'Asian', 'Mediterranean', 'Indian', 'American'
+  ];
+  
+  const mealTypePresets = [
+    'Quick meals (30 min)', 'One-pot meals', 'Meal prep friendly', 'Family-friendly', 'Healthy', 'Comfort food'
+  ];
+
+  const togglePreset = (preset: string) => {
+    setSelectedPresets(prev => {
+      if (prev.includes(preset)) {
+        return prev.filter(p => p !== preset);
+      } else {
+        return [...prev, preset];
+      }
+    });
+  };
+
+  const getCombinedPreferences = () => {
+    const combined = [...selectedPresets];
+    if (preferences.trim()) {
+      combined.push(preferences.trim());
+    }
+    return combined.join(', ');
+  };
 
   const handleGenerateMealPlan = async () => {
-    if (!preferences.trim()) {
-      Alert.alert('Error', 'Please enter your meal preferences');
+    const finalPreferences = getCombinedPreferences();
+    
+    if (!finalPreferences) {
+      Alert.alert('Error', 'Please select preferences or enter your own');
       return;
     }
 
     setIsGenerating(true);
     try {
-      const result = await GeminiService.generateMealPlan(preferences, parseInt(servings) || 4);
+      const result = await GeminiService.generateMealPlan(finalPreferences, parseInt(servings) || 4);
       
-      result.meals.forEach(meal => {
+      for (const meal of result.meals) {
         addMealPlan({
           name: meal.name,
           description: meal.description,
           ingredients: meal.ingredients,
           servings: parseInt(servings) || 4,
         });
-      });
+      }
 
       Alert.alert(
         'Success!',
         `Generated ${result.meals.length} meal plans based on your preferences.`
       );
       setPreferences('');
+      setSelectedPresets([]);
     } catch (error) {
       Alert.alert('Error', 'Failed to generate meal plan. Please try again.');
     } finally {
@@ -126,59 +161,191 @@ export const MealPlannerScreen: React.FC = () => {
             </Text>
           </View>
           
-          <Text className="text-gray-600 mb-3">
+          <Text className="text-gray-600 mb-4">
             Tell us your preferences and we'll create a personalized meal plan with grocery list!
           </Text>
 
-          <View className="space-y-4">
+          <View className="space-y-6">
             <View>
-              <Text className="text-sm font-semibold text-gray-700 mb-2">
-                Meal Preferences
-              </Text>
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-sm font-semibold text-gray-700">
+                  Meal Preferences
+                </Text>
+                {selectedPresets.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => setSelectedPresets([])}
+                    className="px-3 py-1 bg-red-500 rounded-full"
+                  >
+                    <Text className="text-xs text-white font-medium">Reset All Preferences</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              
+              {/* Dietary Preferences */}
+              {/* <View className="flex-row items-center justify-between mb-2">
+                <Text className="text-xs font-medium text-gray-600">Dietary</Text>
+                {selectedPresets.some(p => dietaryPresets.includes(p)) && (
+                  <TouchableOpacity
+                    onPress={() => setSelectedPresets(prev => prev.filter(p => !dietaryPresets.includes(p)))}
+                    className="px-2 py-1 bg-red-100 rounded-full"
+                  >
+                    <Text className="text-xs text-red-600 font-medium">Reset Dietary</Text>
+                  </TouchableOpacity>
+                )}
+              </View> */}
+              <View className="flex-row flex-wrap mb-4">
+                {dietaryPresets.map((preset) => (
+                  <TouchableOpacity
+                    key={preset}
+                    onPress={() => togglePreset(preset)}
+                    className={`px-3 py-2 rounded-full mr-3 mb-3 border-2 ${
+                      selectedPresets.includes(preset)
+                        ? 'bg-green-500 border-green-600'
+                        : 'bg-gray-100 border-gray-200'
+                    }`}
+                  >
+                    <Text className={`text-sm font-medium ${
+                      selectedPresets.includes(preset)
+                        ? 'text-white'
+                        : 'text-gray-700'
+                    }`}>
+                      {preset}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Cuisine Preferences */}
+              <Text className="text-xs font-medium text-gray-600 mb-2">Cuisine</Text>
+              <View className="flex-row flex-wrap mb-4">
+                {cuisinePresets.map((preset) => (
+                  <TouchableOpacity
+                    key={preset}
+                    onPress={() => togglePreset(preset)}
+                    className={`px-3 py-2 rounded-full mr-3 mb-3 border-2 ${
+                      selectedPresets.includes(preset)
+                        ? 'bg-blue-500 border-blue-600'
+                        : 'bg-gray-100 border-gray-200'
+                    }`}
+                  >
+                    <Text className={`text-sm font-medium ${
+                      selectedPresets.includes(preset)
+                        ? 'text-white'
+                        : 'text-gray-700'
+                    }`}>
+                      {preset}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Meal Type Preferences */}
+              <Text className="text-xs font-medium text-gray-600 mb-2">Meal Type</Text>
+              <View className="flex-row flex-wrap mb-4">
+                {mealTypePresets.map((preset) => (
+                  <TouchableOpacity
+                    key={preset}
+                    onPress={() => togglePreset(preset)}
+                    className={`px-3 py-2 rounded-full mr-3 mb-3 border-2 ${
+                      selectedPresets.includes(preset)
+                        ? 'bg-orange-500 border-orange-600'
+                        : 'bg-gray-100 border-gray-200'
+                    }`}
+                  >
+                    <Text className={`text-sm font-medium ${
+                      selectedPresets.includes(preset)
+                        ? 'text-white'
+                        : 'text-gray-700'
+                    }`}>
+                      {preset}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Custom Preferences */}
+              <Text className="text-xs font-medium text-gray-600 mb-2">Additional Preferences (Optional)</Text>
               <TextInput
-                className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800"
-                placeholder="e.g., vegetarian, low-carb, Italian cuisine, quick meals..."
+                className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800 mb-3"
+                placeholder="e.g., use chicken, avoid nuts, spicy food..."
                 value={preferences}
                 onChangeText={setPreferences}
                 multiline
-                numberOfLines={3}
+                numberOfLines={2}
                 textAlignVertical="top"
               />
             </View>
 
             <View>
-              <Text className="text-sm font-semibold text-gray-700 mb-2">
+              <Text className="text-sm font-semibold text-gray-700 mb-3">
                 Number of Servings
               </Text>
-              <TextInput
-                className="bg-gray-50 rounded-xl px-4 py-3 text-gray-800"
-                placeholder="4"
-                value={servings}
-                onChangeText={setServings}
-                keyboardType="numeric"
-              />
+              <View className="flex-row items-center mb-4">
+                {['2', '4', '6', '8'].map((serving) => (
+                  <TouchableOpacity
+                    key={serving}
+                    onPress={() => setServings(serving)}
+                    className={`px-4 py-2 rounded-lg mr-4 border-2 ${
+                      servings === serving
+                        ? 'bg-green-500 border-green-600'
+                        : 'bg-gray-100 border-gray-200'
+                    }`}
+                  >
+                    <Text className={`font-medium ${
+                      servings === serving
+                        ? 'text-white'
+                        : 'text-gray-700'
+                    }`}>
+                      {serving}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+                <TextInput
+                  className="bg-gray-50 rounded-lg px-3 py-2 text-gray-800 flex-1 border-2 border-gray-200 ml-2"
+                  placeholder="Custom"
+                  value={!['2', '4', '6', '8'].includes(servings) ? servings : ''}
+                  onChangeText={setServings}
+                  keyboardType="numeric"
+                />
+              </View>
             </View>
 
-            <TouchableOpacity
-              onPress={handleGenerateMealPlan}
-              disabled={isGenerating}
-              className={`rounded-xl py-4 ${
-                isGenerating ? 'bg-gray-400' : 'bg-green-500'
-              }`}
-            >
-              {isGenerating ? (
-                <View className="flex-row items-center justify-center">
-                  <ActivityIndicator color="white" size="small" />
-                  <Text className="text-white font-semibold ml-2">
-                    Generating...
-                  </Text>
-                </View>
-              ) : (
-                <Text className="text-white text-center font-semibold text-lg">
-                  Generate Meal Plan
+            <View className="flex-row space-x-4">
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedPresets([]);
+                  setPreferences('');
+                  setServings('4');
+                }}
+                className="flex-1 bg-gray-200 rounded-xl py-4 mx-1"
+              >
+                <Text className="text-gray-700 text-center font-semibold">
+                  Clear All
                 </Text>
-              )}
-            </TouchableOpacity>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={handleGenerateMealPlan}
+                disabled={isGenerating}
+                className={`flex-2 rounded-xl py-4 mx-1 ${
+                  isGenerating ? 'bg-gray-400' : 'bg-green-500'
+                }`}
+                style={{ flex: 2 }}
+              >
+                {isGenerating ? (
+                  <View className="flex-row items-center justify-center">
+                    <ActivityIndicator color="white" size="small" />
+                    <Text className="text-white font-semibold ml-2">
+                      Generating...
+                    </Text>
+                  </View>
+                ) : (
+                  <Text className="text-white text-center font-semibold text-lg">
+                    Generate Meal Plan
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -203,20 +370,6 @@ export const MealPlannerScreen: React.FC = () => {
               </Text>
             </View>
           )}
-        </View>
-
-        {/* Tips */}
-        <View className="bg-blue-50 rounded-xl p-4 mb-8">
-          <View className="flex-row items-center mb-2">
-            <Ionicons name="bulb" size={20} color="#3b82f6" />
-            <Text className="text-blue-800 font-semibold ml-2">Pro Tips</Text>
-          </View>
-          <Text className="text-blue-700 text-sm">
-            • Be specific with your preferences for better results{'\n'}
-            • Include dietary restrictions or allergies{'\n'}
-            • Mention cooking time preferences (quick, slow-cook, etc.){'\n'}
-            • Add ingredients you want to use up
-          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>

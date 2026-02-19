@@ -2,7 +2,7 @@
 
 A modern, AI-powered grocery list mobile app built with React Native and Expo. Grozo helps you organize your shopping with smart suggestions, meal planning, and family list sharing.
 
-## ✨ Features
+##  Features
 
 ### Core Features
 - ✅ Add / Edit / Delete grocery items

@@ -34,6 +34,7 @@ export const EditItemScreen: React.FC = () => {
   const [price, setPrice] = useState(item.price?.toString() || '');
   const [notes, setNotes] = useState(item.notes || '');
   const [lowStockThreshold, setLowStockThreshold] = useState(item.lowStockThreshold?.toString() || '');
+  const [isCompleted, setIsCompleted] = useState(item.isCompleted);
 
   const handleSave = () => {
     if (!name.trim()) {
@@ -49,6 +50,7 @@ export const EditItemScreen: React.FC = () => {
       price: price ? parseFloat(price) : undefined,
       notes: notes.trim() || undefined,
       lowStockThreshold: lowStockThreshold ? parseInt(lowStockThreshold) : undefined,
+      isCompleted,
     };
 
     updateItem(item.id, updates);
@@ -64,9 +66,7 @@ export const EditItemScreen: React.FC = () => {
             <Ionicons name="arrow-back" size={24} color="#374151" />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-gray-800">Edit Item</Text>
-          <TouchableOpacity onPress={handleSave}>
-            <Text className="text-green-600 font-semibold">Save</Text>
-          </TouchableOpacity>
+          <View className="w-6" />
         </View>
 
         {/* Form */}
@@ -198,19 +198,40 @@ export const EditItemScreen: React.FC = () => {
           </View>
 
           {/* Item Status */}
-          <View className="bg-white rounded-xl p-4 shadow-sm">
+          <View>
             <Text className="text-sm font-semibold text-gray-700 mb-2">Item Status</Text>
-            <View className="flex-row items-center">
-              <View className={`w-4 h-4 rounded-full mr-3 ${
-                item.isCompleted ? 'bg-green-500' : 'bg-gray-300'
-              }`} />
-              <Text className="text-gray-800">
-                {item.isCompleted ? 'Completed' : 'Pending'}
+            <View className="bg-white rounded-xl p-4 shadow-sm">
+              <View className="flex-row space-x-3">
+                <TouchableOpacity
+                  onPress={() => setIsCompleted(false)}
+                  className={`flex-1 items-center justify-center py-3 px-4 rounded-lg ${
+                    !isCompleted ? 'bg-orange-500' : 'bg-gray-100'
+                  }`}
+                >
+                  <Text className={`font-medium ${
+                    !isCompleted ? 'text-white' : 'text-gray-600'
+                  }`}>
+                    Pending
+                  </Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  onPress={() => setIsCompleted(true)}
+                  className={`flex-1 items-center justify-center py-3 px-4 rounded-lg ${
+                    isCompleted ? 'bg-green-500' : 'bg-gray-100'
+                  }`}
+                >
+                  <Text className={`font-medium ${
+                    isCompleted ? 'text-white' : 'text-gray-600'
+                  }`}>
+                    Completed
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <Text className="text-xs text-gray-500 mt-3">
+                Added on {item.addedAt.toLocaleDateString()} at {item.addedAt.toLocaleTimeString()}
               </Text>
             </View>
-            <Text className="text-xs text-gray-500 mt-2">
-              Added on {item.addedAt.toLocaleDateString()}
-            </Text>
           </View>
         </View>
 

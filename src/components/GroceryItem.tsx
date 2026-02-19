@@ -7,18 +7,30 @@ import { useGroceryStore } from '../store/groceryStore';
 interface Props {
   item: GroceryItemType;
   onEdit?: () => void;
+  onToggle?: () => void;
+  onDelete?: () => void;
 }
 
-export const GroceryItem: React.FC<Props> = ({ item, onEdit }) => {
+export const GroceryItem: React.FC<Props> = ({ item, onEdit, onToggle, onDelete }) => {
   const { toggleItemComplete, deleteItem } = useGroceryStore();
 
+  const handleToggle = () => {
+    if (onToggle) {
+      onToggle();
+    } else {
+      toggleItemComplete(item.id);
+    }
+  };
+
   const handleDelete = () => {
+    const deleteAction = onDelete || (() => deleteItem(item.id));
+    
     Alert.alert(
       'Delete Item',
       `Are you sure you want to delete "${item.name}"?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteItem(item.id) },
+        { text: 'Delete', style: 'destructive', onPress: deleteAction },
       ]
     );
   };
@@ -28,7 +40,7 @@ export const GroceryItem: React.FC<Props> = ({ item, onEdit }) => {
       item.isCompleted ? 'opacity-60' : ''
     }`}>
       <TouchableOpacity
-        onPress={() => toggleItemComplete(item.id)}
+        onPress={handleToggle}
         className={`w-6 h-6 rounded-full border-2 mr-3 items-center justify-center ${
           item.isCompleted 
             ? 'bg-green-500 border-green-500' 

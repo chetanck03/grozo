@@ -31,7 +31,11 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
+
+# EAS build configuration (contains API keys)
+eas.json
 
 # typescript
 *.tsbuildinfo

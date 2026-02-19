@@ -1,11 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  GEMINI_API_KEY: 'YOUR_GEMINI_API_KEY', // Replace with your actual Gemini API key
-  GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
-  
-  // Other API endpoints can be added here
-  // PRICE_COMPARISON_API: 'your-price-api-endpoint',
-  // STORE_LOCATOR_API: 'your-store-locator-endpoint',
+  GEMINI_API_KEY: process.env.EXPO_PUBLIC_GEMINI_API_KEY || '', // Get from environment variables
 };
 
 // App Configuration

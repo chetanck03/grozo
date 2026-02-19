@@ -24,7 +24,7 @@ const units = ['piece', 'kg', 'g', 'lb', 'oz', 'liter', 'ml', 'cup', 'tbsp', 'ts
 export const AddItemScreen: React.FC = () => {
   const navigation = useNavigation<AddItemScreenNavigationProp>();
   const route = useRoute<AddItemScreenRouteProp>();
-  const { addItem, categories } = useGroceryStore();
+  const { addItem, categories, addItemToMyList } = useGroceryStore();
 
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('1');
@@ -67,7 +67,13 @@ export const AddItemScreen: React.FC = () => {
       lowStockThreshold: lowStockThreshold ? parseInt(lowStockThreshold) : undefined,
     };
 
-    addItem(newItem);
+    // If listId is provided, add to specific list, otherwise add to main items
+    if (route.params?.listId) {
+      addItemToMyList(route.params.listId, newItem);
+    } else {
+      addItem(newItem);
+    }
+    
     navigation.goBack();
   };
 
@@ -80,9 +86,7 @@ export const AddItemScreen: React.FC = () => {
             <Ionicons name="arrow-back" size={24} color="#374151" />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-gray-800">Add Item</Text>
-          <TouchableOpacity onPress={handleSave}>
-            <Text className="text-green-600 font-semibold">Save</Text>
-          </TouchableOpacity>
+          <View className="w-6" />
         </View>
 
         {/* Form */}

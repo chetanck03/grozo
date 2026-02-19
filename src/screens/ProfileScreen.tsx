@@ -5,23 +5,31 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Share,
+  Clipboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NavigationProp } from '@react-navigation/native';
 import { useGroceryStore } from '../store/groceryStore';
 import { RootStackParamList } from '../types';
 
-type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+type ProfileScreenNavigationProp = NavigationProp<RootStackParamList>;
 
 export const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<ProfileScreenNavigationProp>();
-  const { items, categories, mealPlans, familyLists } = useGroceryStore();
+  const { items, categories, mealPlans, myLists, clearAllData } = useGroceryStore();
 
   const totalItems = items.length;
   const completedItems = items.filter(item => item.isCompleted).length;
   const totalSpent = items.reduce((sum, item) => sum + (item.price || 0), 0);
+  
+  // Calculate My Lists stats
+  const totalListItems = myLists.reduce((sum, list) => sum + list.items.length, 0);
+  const completedListItems = myLists.reduce((sum, list) => 
+    sum + list.items.filter(item => item.isCompleted).length, 0
+  );
 
   const handleExportList = () => {
     Alert.alert(
@@ -36,29 +44,98 @@ export const ProfileScreen: React.FC = () => {
   };
 
   const exportAsText = () => {
-    const listText = items
-      .map(item => `${item.isCompleted ? '✓' : '○'} ${item.name} (${item.quantity} ${item.unit})`)
-      .join('\n');
+    const listText = generateExportText();
     
-    Alert.alert('Export Complete', `Your list:\n\n${listText}`);
+    Alert.alert(
+      'Export Complete',
+      'Your lists have been copied to clipboard!',
+      [
+        { text: 'OK', onPress: () => Clipboard.setString(listText) }
+      ]
+    );
   };
 
-  const shareList = () => {
-    Alert.alert('Share List', 'Sharing functionality would be implemented here with native sharing APIs.');
+  const shareList = async () => {
+    const listText = generateExportText();
+    
+    try {
+      const result = await Share.share({
+        message: listText,
+        title: 'My Grozo Shopping Lists',
+      });
+      
+      if (result.action === Share.sharedAction) {
+        Alert.alert('Success', 'Lists shared successfully!');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to share lists. Copying to clipboard instead.');
+      Clipboard.setString(listText);
+      Alert.alert('Copied', 'Lists copied to clipboard!');
+    }
+  };
+
+  const generateExportText = () => {
+    let listText = 'GROZO SHOPPING LISTS\n';
+    listText += '========================\n\n';
+    
+    // Export main grocery list
+    if (items.length > 0) {
+      listText += '🛒 MAIN GROCERY LIST:\n';
+      listText += '--------------------\n';
+      items.forEach(item => {
+        listText += `${item.isCompleted ? '✅' : '⭕'} ${item.name} (${item.quantity} ${item.unit})\n`;
+      });
+      listText += '\n';
+    }
+    
+    // Export My Lists
+    if (myLists.length > 0) {
+      myLists.forEach(list => {
+        listText += `${list.name.toUpperCase()}:\n`;
+        listText += '--------------------\n';
+        if (list.items.length > 0) {
+          list.items.forEach(item => {
+            listText += `${item.isCompleted ? '✅' : '⭕'} ${item.name} (${item.quantity} ${item.unit})\n`;
+          });
+        } else {
+          listText += 'No items\n';
+        }
+        listText += '\n';
+      });
+    }
+    
+    // Export meal plans
+    if (mealPlans.length > 0) {
+      listText += 'MEAL PLANS:\n';
+      listText += '--------------------\n';
+      mealPlans.forEach(meal => {
+        listText += `• ${meal.name}\n`;
+        listText += `  ${meal.description}\n`;
+        listText += `  Ingredients: ${meal.ingredients.join(', ')}\n\n`;
+      });
+    }
+    
+    if (items.length === 0 && myLists.length === 0 && mealPlans.length === 0) {
+      listText += 'No data to export\n';
+    }
+    
+    listText += `\nExported from Grozo on ${new Date().toLocaleDateString()}`;
+    
+    return listText;
   };
 
   const handleClearAllData = () => {
     Alert.alert(
       'Clear All Data',
-      'This will permanently delete all your grocery items, meal plans, and family lists. This action cannot be undone.',
+      'This will permanently delete all your grocery items, meal plans, and my lists. This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Clear All',
           style: 'destructive',
           onPress: () => {
-            // Clear all data logic would go here
-            Alert.alert('Success', 'All data has been cleared.');
+            clearAllData();
+            Alert.alert('Success', 'All data has been cleared successfully!');
           },
         },
       ]
@@ -118,20 +195,20 @@ export const ProfileScreen: React.FC = () => {
         {/* Stats */}
         <View className="flex-row mb-6">
           <StatCard
-            title="Total Items"
+            title="Main List Items"
             value={totalItems}
             icon="basket"
             color="#22c55e"
           />
           <StatCard
-            title="Completed"
-            value={completedItems}
-            icon="checkmark-circle"
+            title="My Lists Items"
+            value={totalListItems}
+            icon="list"
             color="#3b82f6"
           />
           <StatCard
             title="Total Spent"
-            value={`$${totalSpent.toFixed(2)}`}
+            value={`${totalSpent.toFixed(2)}`}
             icon="card"
             color="#f59e0b"
           />
@@ -150,13 +227,19 @@ export const ProfileScreen: React.FC = () => {
               <Text className="font-semibold text-gray-800">{mealPlans.length}</Text>
             </View>
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Family Lists</Text>
-              <Text className="font-semibold text-gray-800">{familyLists.length}</Text>
+              <Text className="text-gray-600">My Lists</Text>
+              <Text className="font-semibold text-gray-800">{myLists.length}</Text>
             </View>
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Completion Rate</Text>
+              <Text className="text-gray-600">Main List Completion</Text>
               <Text className="font-semibold text-gray-800">
                 {totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0}%
+              </Text>
+            </View>
+            <View className="flex-row justify-between">
+              <Text className="text-gray-600">Lists Completion</Text>
+              <Text className="font-semibold text-gray-800">
+                {totalListItems > 0 ? Math.round((completedListItems / totalListItems) * 100) : 0}%
               </Text>
             </View>
           </View>
@@ -169,48 +252,40 @@ export const ProfileScreen: React.FC = () => {
           icon="restaurant"
           title="Meal Planner"
           subtitle="AI-powered meal planning"
-          onPress={() => navigation.navigate('MealPlanner')}
+          onPress={() => navigation.navigate('MealPlanner', undefined)}
           color="#22c55e"
         />
 
         <SettingItem
-          icon="people"
-          title="Family Lists"
-          subtitle="Shared grocery lists"
-          onPress={() => navigation.navigate('FamilyLists')}
+          icon="list"
+          title="My Lists"
+          subtitle="Organize shopping with multiple lists"
+          onPress={() => navigation.navigate('MyLists', undefined)}
           color="#3b82f6"
         />
 
         <SettingItem
           icon="share"
-          title="Export List"
-          subtitle="Share or backup your list"
+          title="Export Lists"
+          subtitle="Share or backup all your lists"
           onPress={handleExportList}
           color="#8b5cf6"
-        />
-
-        <SettingItem
-          icon="notifications"
-          title="Notifications"
-          subtitle="Low stock alerts and reminders"
-          onPress={() => Alert.alert('Notifications', 'Notification settings would be configured here.')}
-          color="#f59e0b"
-        />
-
-        <SettingItem
-          icon="settings"
-          title="App Settings"
-          subtitle="Preferences and configuration"
-          onPress={() => Alert.alert('Settings', 'App settings would be configured here.')}
-          color="#6b7280"
         />
 
         <SettingItem
           icon="help-circle"
           title="Help & Support"
           subtitle="Get help using Grozo"
-          onPress={() => Alert.alert('Help', 'Help and support information would be shown here.')}
+          onPress={() => navigation.navigate('HelpSupport', undefined)}
           color="#06b6d4"
+        />
+
+        <SettingItem
+          icon="shield-checkmark"
+          title="Privacy Policy"
+          subtitle="How we protect your data"
+          onPress={() => navigation.navigate('PrivacyPolicy', undefined)}
+          color="#8b5cf6"
         />
 
         <SettingItem
