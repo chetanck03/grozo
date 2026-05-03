@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Share,
   Clipboard,
 } from 'react-native';
@@ -14,12 +13,15 @@ import { useNavigation } from '@react-navigation/native';
 import { NavigationProp } from '@react-navigation/native';
 import { useGroceryStore } from '../store/groceryStore';
 import { RootStackParamList } from '../types';
+import { AlertModal } from '../components/AlertModal';
 
 type ProfileScreenNavigationProp = NavigationProp<RootStackParamList>;
 
 export const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<ProfileScreenNavigationProp>();
   const { items, categories, mealPlans, myLists, clearAllData } = useGroceryStore();
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<any>({});
 
   const totalItems = items.length;
   const completedItems = items.filter(item => item.isCompleted).length;
@@ -32,27 +34,40 @@ export const ProfileScreen: React.FC = () => {
   );
 
   const handleExportList = () => {
-    Alert.alert(
-      'Export List',
-      'Choose export format:',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Text Format', onPress: () => exportAsText() },
-        { text: 'Share List', onPress: () => shareList() },
-      ]
-    );
+    setAlertConfig({
+      title: 'Export List',
+      message: 'Choose export format:',
+      showCancel: true,
+      cancelText: 'Cancel',
+      okText: 'Text Format',
+      onOk: () => {
+        setAlertVisible(false);
+        exportAsText();
+      },
+      extraButtons: [
+        {
+          text: 'Share List',
+          onPress: () => {
+            setAlertVisible(false);
+            shareList();
+          },
+        },
+      ],
+    });
+    setAlertVisible(true);
   };
 
   const exportAsText = () => {
     const listText = generateExportText();
+    Clipboard.setString(listText);
     
-    Alert.alert(
-      'Export Complete',
-      'Your lists have been copied to clipboard!',
-      [
-        { text: 'OK', onPress: () => Clipboard.setString(listText) }
-      ]
-    );
+    setAlertConfig({
+      title: 'Export Complete',
+      message: 'Your lists have been copied to clipboard!',
+      onOk: () => setAlertVisible(false),
+      okText: 'OK',
+    });
+    setAlertVisible(true);
   };
 
   const shareList = async () => {
@@ -65,12 +80,23 @@ export const ProfileScreen: React.FC = () => {
       });
       
       if (result.action === Share.sharedAction) {
-        Alert.alert('Success', 'Lists shared successfully!');
+        setAlertConfig({
+          title: 'Success',
+          message: 'Lists shared successfully!',
+          onOk: () => setAlertVisible(false),
+          okText: 'OK',
+        });
+        setAlertVisible(true);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to share lists. Copying to clipboard instead.');
       Clipboard.setString(listText);
-      Alert.alert('Copied', 'Lists copied to clipboard!');
+      setAlertConfig({
+        title: 'Copied',
+        message: 'Lists copied to clipboard!',
+        onOk: () => setAlertVisible(false),
+        okText: 'OK',
+      });
+      setAlertVisible(true);
     }
   };
 
@@ -125,21 +151,27 @@ export const ProfileScreen: React.FC = () => {
   };
 
   const handleClearAllData = () => {
-    Alert.alert(
-      'Clear All Data',
-      'This will permanently delete all your grocery items, meal plans, and my lists. This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear All',
-          style: 'destructive',
-          onPress: () => {
-            clearAllData();
-            Alert.alert('Success', 'All data has been cleared successfully!');
-          },
-        },
-      ]
-    );
+    setAlertConfig({
+      title: 'Clear All Data',
+      message: 'This will permanently delete all your grocery items, meal plans, and my lists. This action cannot be undone.',
+      showCancel: true,
+      cancelText: 'Cancel',
+      okText: 'Clear All',
+      onOk: () => {
+        clearAllData();
+        setAlertVisible(false);
+        setTimeout(() => {
+          setAlertConfig({
+            title: 'Success',
+            message: 'All data has been cleared successfully!',
+            onOk: () => setAlertVisible(false),
+            okText: 'OK',
+          });
+          setAlertVisible(true);
+        }, 100);
+      },
+    });
+    setAlertVisible(true);
   };
 
   const SettingItem: React.FC<{
@@ -305,6 +337,17 @@ export const ProfileScreen: React.FC = () => {
           </Text>
         </View>
       </ScrollView>
+      <AlertModal
+        visible={alertVisible}
+        title={alertConfig.title || ''}
+        message={alertConfig.message || ''}
+        onOk={alertConfig.onOk || (() => {})}
+        okText={alertConfig.okText || 'OK'}
+        onCancel={alertConfig.onCancel}
+        cancelText={alertConfig.cancelText || 'Cancel'}
+        showCancel={alertConfig.showCancel || false}
+        extraButtons={alertConfig.extraButtons}
+      />
     </SafeAreaView>
   );
 };

@@ -1,5 +1,54 @@
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GroceryItem, GroceryCategory, MealPlan, MyList } from '../types';
+
+const STORAGE_KEY = '@grozo_store';
+
+// Load persisted state
+const loadState = async () => {
+  try {
+    const persistedData = await AsyncStorage.getItem(STORAGE_KEY);
+    if (persistedData) {
+      const parsed = JSON.parse(persistedData);
+      // Convert date strings back to Date objects
+      if (parsed.items) {
+        parsed.items = parsed.items.map((item: any) => ({
+          ...item,
+          addedAt: new Date(item.addedAt)
+        }));
+      }
+      if (parsed.mealPlans) {
+        parsed.mealPlans = parsed.mealPlans.map((plan: any) => ({
+          ...plan,
+          createdAt: new Date(plan.createdAt)
+        }));
+      }
+      if (parsed.myLists) {
+        parsed.myLists = parsed.myLists.map((list: any) => ({
+          ...list,
+          createdAt: new Date(list.createdAt),
+          items: list.items.map((item: any) => ({
+            ...item,
+            addedAt: new Date(item.addedAt)
+          }))
+        }));
+      }
+      return parsed;
+    }
+  } catch (error) {
+    console.error('Failed to load state:', error);
+  }
+  return null;
+};
+
+// Save state to storage
+const saveState = async (state: any) => {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.error('Failed to save state:', error);
+  }
+};
 
 interface GroceryStore {
   items: GroceryItem[];
@@ -7,6 +56,8 @@ interface GroceryStore {
   mealPlans: MealPlan[];
   myLists: MyList[];
   suggestions: string[];
+  _hydrated: boolean;
+  hydrate: () => Promise<void>;
   
   // Actions
   addItem: (item: Omit<GroceryItem, 'id' | 'addedAt'>) => void;
@@ -61,44 +112,86 @@ export const useGroceryStore = create<GroceryStore>((set, get) => ({
   myLists: [],
   suggestions: commonSuggestions,
 
-  addItem: (item) => set((state) => ({
-    items: [...state.items, {
-      ...item,
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      addedAt: new Date(),
-    }]
-  })),
+  // Initialize with persisted data
+  _hydrated: false,
+  hydrate: async () => {
+    const persisted = await loadState();
+    if (persisted) {
+      set({
+        items: persisted.items || [],
+        categories: persisted.categories || defaultCategories,
+        mealPlans: persisted.mealPlans || [],
+        myLists: persisted.myLists || [],
+        suggestions: persisted.suggestions || commonSuggestions,
+        _hydrated: true,
+      });
+    } else {
+      set({ _hydrated: true });
+    }
+  },
 
-  updateItem: (id, updates) => set((state) => ({
-    items: state.items.map(item => 
-      item.id === id ? { ...item, ...updates } : item
-    )
-  })),
+  addItem: (item) => set((state) => {
+    const newState = {
+      items: [...state.items, {
+        ...item,
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        addedAt: new Date(),
+      }]
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
 
-  deleteItem: (id) => set((state) => ({
-    items: state.items.filter(item => item.id !== id)
-  })),
+  updateItem: (id, updates) => set((state) => {
+    const newState = {
+      items: state.items.map(item => 
+        item.id === id ? { ...item, ...updates } : item
+      )
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
 
-  toggleItemComplete: (id) => set((state) => ({
-    items: state.items.map(item =>
-      item.id === id ? { ...item, isCompleted: !item.isCompleted } : item
-    )
-  })),
+  deleteItem: (id) => set((state) => {
+    const newState = {
+      items: state.items.filter(item => item.id !== id)
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
 
-  addCategory: (category) => set((state) => ({
-    categories: [...state.categories, {
-      ...category,
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    }]
-  })),
+  toggleItemComplete: (id) => set((state) => {
+    const newState = {
+      items: state.items.map(item =>
+        item.id === id ? { ...item, isCompleted: !item.isCompleted } : item
+      )
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
 
-  addMealPlan: (mealPlan) => set((state) => ({
-    mealPlans: [...state.mealPlans, {
-      ...mealPlan,
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      createdAt: new Date(),
-    }]
-  })),
+  addCategory: (category) => set((state) => {
+    const newState = {
+      categories: [...state.categories, {
+        ...category,
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      }]
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
+
+  addMealPlan: (mealPlan) => set((state) => {
+    const newState = {
+      mealPlans: [...state.mealPlans, {
+        ...mealPlan,
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        createdAt: new Date(),
+      }]
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
 
   generateGroceryListFromMeal: (mealPlanId) => {
     const mealPlan = get().mealPlans.find(plan => plan.id === mealPlanId);
@@ -126,64 +219,90 @@ export const useGroceryStore = create<GroceryStore>((set, get) => ({
     set({ suggestions: filtered });
   },
 
-  createMyList: (name, color) => set((state) => ({
-    myLists: [...state.myLists, {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name,
+  createMyList: (name, color) => set((state) => {
+    const newState = {
+      myLists: [...state.myLists, {
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name,
+        items: [],
+        createdAt: new Date(),
+        color,
+      }]
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
+
+  deleteMyList: (listId) => set((state) => {
+    const newState = {
+      myLists: state.myLists.filter(list => list.id !== listId)
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
+
+  addItemToMyList: (listId, item) => set((state) => {
+    const newState = {
+      myLists: state.myLists.map(list =>
+        list.id === listId
+          ? {
+              ...list,
+              items: [...list.items, {
+                ...item,
+                id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                addedAt: new Date(),
+              }]
+            }
+          : list
+      )
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
+
+  removeItemFromMyList: (listId, itemId) => set((state) => {
+    const newState = {
+      myLists: state.myLists.map(list =>
+        list.id === listId
+          ? {
+              ...list,
+              items: list.items.filter(item => item.id !== itemId)
+            }
+          : list
+      )
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
+
+  toggleMyListItemComplete: (listId, itemId) => set((state) => {
+    const newState = {
+      myLists: state.myLists.map(list =>
+        list.id === listId
+          ? {
+              ...list,
+              items: list.items.map(item =>
+                item.id === itemId ? { ...item, isCompleted: !item.isCompleted } : item
+              )
+            }
+          : list
+      )
+    };
+    saveState({ ...state, ...newState });
+    return newState;
+  }),
+
+  clearAllData: () => set(() => {
+    const newState = {
       items: [],
-      createdAt: new Date(),
-      color,
-    }]
-  })),
-
-  deleteMyList: (listId) => set((state) => ({
-    myLists: state.myLists.filter(list => list.id !== listId)
-  })),
-
-  addItemToMyList: (listId, item) => set((state) => ({
-    myLists: state.myLists.map(list =>
-      list.id === listId
-        ? {
-            ...list,
-            items: [...list.items, {
-              ...item,
-              id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              addedAt: new Date(),
-            }]
-          }
-        : list
-    )
-  })),
-
-  removeItemFromMyList: (listId, itemId) => set((state) => ({
-    myLists: state.myLists.map(list =>
-      list.id === listId
-        ? {
-            ...list,
-            items: list.items.filter(item => item.id !== itemId)
-          }
-        : list
-    )
-  })),
-
-  toggleMyListItemComplete: (listId, itemId) => set((state) => ({
-    myLists: state.myLists.map(list =>
-      list.id === listId
-        ? {
-            ...list,
-            items: list.items.map(item =>
-              item.id === itemId ? { ...item, isCompleted: !item.isCompleted } : item
-            )
-          }
-        : list
-    )
-  })),
-
-  clearAllData: () => set(() => ({
-    items: [],
-    mealPlans: [],
-    myLists: [],
-    categories: defaultCategories, // Keep default categories
-    suggestions: commonSuggestions, // Keep default suggestions
-  })),
+      mealPlans: [],
+      myLists: [],
+      categories: defaultCategories,
+      suggestions: commonSuggestions,
+    };
+    saveState(newState);
+    // Also clear from AsyncStorage
+    AsyncStorage.removeItem(STORAGE_KEY).catch(err => console.error('Failed to clear storage:', err));
+    return newState;
+  }),
 }));

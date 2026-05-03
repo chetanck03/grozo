@@ -10,6 +10,11 @@ interface AlertModalProps {
   onCancel?: () => void;
   cancelText?: string;
   showCancel?: boolean;
+  extraButtons?: Array<{
+    text: string;
+    onPress: () => void;
+    style?: 'default' | 'cancel' | 'destructive';
+  }>;
 }
 
 export const AlertModal: React.FC<AlertModalProps> = ({
@@ -21,6 +26,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   onCancel,
   cancelText = 'Cancel',
   showCancel = false,
+  extraButtons,
 }) => {
   return (
     <Modal
@@ -44,20 +50,38 @@ export const AlertModal: React.FC<AlertModalProps> = ({
               </Text>
 
               {/* Buttons */}
-              <View className="flex-row">
-                {showCancel && onCancel && (
-                  <TouchableOpacity
-                    onPress={onCancel}
-                    className="flex-1 bg-gray-200 rounded-xl py-3 mr-3"
-                  >
-                    <Text className="text-gray-700 text-center font-semibold">
-                      {cancelText}
-                    </Text>
-                  </TouchableOpacity>
-                )}
+              <View>
+                {/* First row: Cancel + Extra buttons */}
+                {(showCancel && onCancel) || (extraButtons && extraButtons.length > 0) ? (
+                  <View className="flex-row mb-2">
+                    {showCancel && onCancel && (
+                      <TouchableOpacity
+                        onPress={onCancel}
+                        className="flex-1 bg-gray-200 rounded-xl py-3 mr-3"
+                      >
+                        <Text className="text-gray-700 text-center font-semibold">
+                          {cancelText}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {extraButtons && extraButtons.map((button, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        onPress={button.onPress}
+                        className={`flex-1 bg-green-500 rounded-xl py-3 ${showCancel && onCancel ? 'mr-3' : ''}`}
+                      >
+                        <Text className="text-white text-center font-semibold">
+                          {button.text}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ) : null}
+                
+                {/* Second row: OK button */}
                 <TouchableOpacity
                   onPress={onOk}
-                  className={`${showCancel ? 'flex-1' : 'w-full'} bg-green-500 rounded-xl py-3`}
+                  className="w-full bg-green-500 rounded-xl py-3"
                 >
                   <Text className="text-white text-center font-semibold">
                     {okText}
