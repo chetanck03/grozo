@@ -75,7 +75,7 @@ export class ShoppingService {
           title: 'AI Suggestion',
           description: tip,
           category: 'savings',
-          icon: '🤖',
+          icon: 'robot',
         });
       });
     } catch (error) {
@@ -104,14 +104,14 @@ export class ShoppingService {
           title: 'Buy Seasonal Produce',
           description: 'Seasonal fruits and vegetables are fresher and more affordable',
           category: 'savings',
-          icon: '🍎',
+          icon: 'apple',
         },
         {
           id: 'produce-2',
           title: 'Check for Ripeness',
           description: 'Buy fruits at different ripeness stages to enjoy them throughout the week',
           category: 'convenience',
-          icon: '🥑',
+          icon: 'nutrition',
         },
       ],
       'Dairy & Eggs': [
@@ -120,7 +120,7 @@ export class ShoppingService {
           title: 'Check Expiration Dates',
           description: 'Look for the furthest expiration date, especially for milk and yogurt',
           category: 'convenience',
-          icon: '🥛',
+          icon: 'restaurant',
         },
       ],
       'Meat & Seafood': [
@@ -129,7 +129,7 @@ export class ShoppingService {
           title: 'Buy in Bulk and Freeze',
           description: 'Purchase larger quantities when on sale and freeze portions',
           category: 'savings',
-          icon: '🥩',
+          icon: 'star',
         },
       ],
     };
@@ -144,21 +144,21 @@ export class ShoppingService {
         title: 'Shop the Perimeter',
         description: 'Fresh foods are usually located around the store perimeter',
         category: 'health',
-        icon: '🏪',
+        icon: 'storefront',
       },
       {
         id: 'general-2',
         title: 'Use Store Apps',
         description: 'Download store apps for exclusive coupons and deals',
         category: 'savings',
-        icon: '📱',
+        icon: 'phone-portrait',
       },
       {
         id: 'general-3',
         title: 'Make a Meal Plan',
         description: 'Planning meals reduces food waste and saves money',
         category: 'convenience',
-        icon: '📝',
+        icon: 'clipboard',
       },
     ];
 
@@ -169,7 +169,7 @@ export class ShoppingService {
         title: 'Organize by Store Layout',
         description: 'Group items by store sections to shop more efficiently',
         category: 'convenience',
-        icon: '🗺️',
+        icon: 'map',
       });
     }
 
@@ -179,7 +179,7 @@ export class ShoppingService {
         title: 'Compare Unit Prices',
         description: 'Check price per unit for expensive items to get the best deal',
         category: 'savings',
-        icon: '💰',
+        icon: 'cash',
       });
     }
 

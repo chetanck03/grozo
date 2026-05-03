@@ -82,7 +82,7 @@ export class NotificationService {
       const itemNames = lowStockItems.map(item => item.name).join(', ');
       
       await this.scheduleLocalNotification(
-        'Low Stock Alert! 📦',
+        'Low Stock Alert!',
         `Running low on: ${itemNames}`,
         { type: 'low_stock', items: lowStockItems }
         // No trigger = immediate notification
@@ -96,7 +96,7 @@ export class NotificationService {
 
     // Schedule daily reminder at 9 AM
     await this.scheduleLocalNotification(
-      'Grozo Reminder 🛒',
+      'Grozo Reminder',
       "Don't forget to check your grocery list before shopping!",
       { type: 'daily_reminder' }
       // Note: Daily repeating notifications require a different approach in production
@@ -109,7 +109,7 @@ export class NotificationService {
     
     if (pendingItems.length > 0) {
       await this.scheduleLocalNotification(
-        'Shopping Reminder 🛍️',
+        'Shopping Reminder',
         `You have ${pendingItems.length} items on your grocery list`,
         { type: 'shopping_reminder', count: pendingItems.length }
         // No trigger = immediate notification
@@ -127,7 +127,7 @@ export class NotificationService {
 
   static async getMealPlanningReminder(): Promise<void> {
     await this.scheduleLocalNotification(
-      'Meal Planning Time! 🍽️',
+      'Meal Planning Time!',
       'Plan your meals for the week and generate your grocery list',
       { type: 'meal_planning' }
       // Note: Weekly repeating notifications require a different approach in production

@@ -46,7 +46,7 @@ export const CategoriesScreen: React.FC = () => {
                     className="w-10 h-10 rounded-full items-center justify-center mr-3"
                     style={{ backgroundColor: `${category.color}20` }}
                   >
-                    <Text className="text-xl">{category.icon}</Text>
+                    <Ionicons name={category.icon as any} size={20} color={category.color} />
                   </View>
                   <View>
                     <Text className="text-lg font-bold text-gray-800">

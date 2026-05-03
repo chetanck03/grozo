@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { GroceryCategory } from '../types';
 
 interface Props {
@@ -21,7 +22,7 @@ export const CategoryCard: React.FC<Props> = ({ category, itemCount, onPress }) 
             className="w-12 h-12 rounded-full items-center justify-center mr-3"
             style={{ backgroundColor: `${category.color}20` }}
           >
-            <Text className="text-2xl">{category.icon}</Text>
+            <Ionicons name={category.icon as any} size={24} color={category.color} />
           </View>
           <View className="flex-1">
             <Text className="text-lg font-semibold text-gray-800">

@@ -166,8 +166,8 @@ export const AddItemScreen: React.FC = () => {
                         : 'bg-gray-100'
                     }`}
                   >
-                    <Text className="text-lg mr-2">{category.icon}</Text>
-                    <Text className={`text-sm font-medium ${
+                    <Ionicons name={category.icon as any} size={16} color={selectedCategory === category.name ? 'white' : category.color} />
+                    <Text className={`text-sm font-medium ml-2 ${
                       selectedCategory === category.name 
                         ? 'text-white' 
                         : 'text-gray-700'

@@ -36,14 +36,14 @@ interface GroceryStore {
 }
 
 const defaultCategories: GroceryCategory[] = [
-  { id: '1', name: 'Fruits & Vegetables', icon: '🥬', color: '#22c55e' },
-  { id: '2', name: 'Dairy & Eggs', icon: '🥛', color: '#3b82f6' },
-  { id: '3', name: 'Meat & Seafood', icon: '🥩', color: '#ef4444' },
-  { id: '4', name: 'Bakery', icon: '🍞', color: '#f59e0b' },
-  { id: '5', name: 'Pantry', icon: '🥫', color: '#8b5cf6' },
-  { id: '6', name: 'Frozen', icon: '🧊', color: '#06b6d4' },
-  { id: '7', name: 'Beverages', icon: '🥤', color: '#10b981' },
-  { id: '8', name: 'Snacks', icon: '🍿', color: '#f97316' },
+  { id: '1', name: 'Fruits & Vegetables', icon: 'leaf', color: '#22c55e' },
+  { id: '2', name: 'Dairy & Eggs', icon: 'egg', color: '#3b82f6' },
+  { id: '3', name: 'Meat & Seafood', icon: 'fish', color: '#ef4444' },
+  { id: '4', name: 'Bakery', icon: 'restaurant', color: '#f59e0b' },
+  { id: '5', name: 'Pantry', icon: 'cube', color: '#8b5cf6' },
+  { id: '6', name: 'Frozen', icon: 'snow', color: '#06b6d4' },
+  { id: '7', name: 'Beverages', icon: 'cafe', color: '#10b981' },
+  { id: '8', name: 'Snacks', icon: 'fast-food', color: '#f97316' },
 ];
 
 const listColors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#10b981', '#f97316'];

@@ -80,10 +80,10 @@ export const ProfileScreen: React.FC = () => {
     
     // Export main grocery list
     if (items.length > 0) {
-      listText += '🛒 MAIN GROCERY LIST:\n';
+      listText += 'MAIN GROCERY LIST:\n';
       listText += '--------------------\n';
       items.forEach(item => {
-        listText += `${item.isCompleted ? '✅' : '⭕'} ${item.name} (${item.quantity} ${item.unit})\n`;
+        listText += `${item.isCompleted ? '[DONE]' : '[TODO]'} ${item.name} (${item.quantity} ${item.unit})\n`;
       });
       listText += '\n';
     }
@@ -95,7 +95,7 @@ export const ProfileScreen: React.FC = () => {
         listText += '--------------------\n';
         if (list.items.length > 0) {
           list.items.forEach(item => {
-            listText += `${item.isCompleted ? '✅' : '⭕'} ${item.name} (${item.quantity} ${item.unit})\n`;
+            listText += `${item.isCompleted ? '[DONE]' : '[TODO]'} ${item.name} (${item.quantity} ${item.unit})\n`;
           });
         } else {
           listText += 'No items\n';
