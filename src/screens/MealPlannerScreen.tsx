@@ -15,12 +15,14 @@ import { useGroceryStore } from '../store/groceryStore';
 import { RootStackParamList } from '../types';
 import { GeminiService } from '../services/geminiService';
 import { AlertModal } from '../components/AlertModal';
+import { useInterstitialAd } from '../hooks/useInterstitialAd';
 
 type MealPlannerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MealPlanner'>;
 
 export const MealPlannerScreen: React.FC = () => {
   const navigation = useNavigation<MealPlannerScreenNavigationProp>();
   const { mealPlans, addMealPlan, generateGroceryListFromMeal } = useGroceryStore();
+  const { showAd: showInterstitialAd } = useInterstitialAd();
   
   const [preferences, setPreferences] = useState('');
   const [servings, setServings] = useState('4');
@@ -101,6 +103,8 @@ export const MealPlannerScreen: React.FC = () => {
           setAlertVisible(false);
           setPreferences('');
           setSelectedPresets([]);
+          // Show interstitial ad after generating meal plan
+          showInterstitialAd();
         },
       });
       setAlertVisible(true);

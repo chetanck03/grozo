@@ -17,12 +17,14 @@ import { CategoryCard } from '../components/CategoryCard';
 import { RootStackParamList, TabParamList } from '../types';
 import { GeminiService } from '../services/geminiService';
 import { AlertModal } from '../components/AlertModal';
+import { useInterstitialAd } from '../hooks/useInterstitialAd';
 
 type HomeScreenNavigationProp = NavigationProp<RootStackParamList>;
 
 export const HomeScreen: React.FC = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { items, categories, suggestions, updateSuggestions, deleteItem } = useGroceryStore();
+  const { showAd: showInterstitialAd } = useInterstitialAd();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);

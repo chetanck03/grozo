@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { View } from 'react-native';
 
 import { RootStackParamList, TabParamList } from '../types';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -15,6 +16,7 @@ import { MealPlannerScreen } from '../screens/MealPlannerScreen';
 import { MyListsScreen } from '../screens/MyListsScreen';
 import { PrivacyPolicyScreen } from '../screens/PrivacyPolicyScreen';
 import { HelpSupportScreen } from '../screens/HelpSupportScreen';
+import { AdMobBanner } from '../components/AdMobBanner';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -90,7 +92,14 @@ export const AppNavigator = () => {
           cardStyle: { backgroundColor: '#f9fafb' },
         }}
       >
-        <Stack.Screen name="MainTabs" component={TabNavigator} />
+        <Stack.Screen name="MainTabs">
+          {() => (
+            <View style={{ flex: 1 }}>
+              <TabNavigator />
+              <AdMobBanner />
+            </View>
+          )}
+        </Stack.Screen>
         <Stack.Screen 
           name="AddItem" 
           component={AddItemScreen}

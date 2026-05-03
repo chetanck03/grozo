@@ -19,7 +19,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.grozo.smartlist",
       "infoPlist": {
-        "NSUserNotificationsUsageDescription": "This app uses notifications to remind you about low stock items and shopping reminders."
+        "NSUserNotificationsUsageDescription": "This app uses notifications to remind you about low stock items and shopping reminders.",
+        "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511"
       }
     },
     "android": {
@@ -31,8 +32,13 @@
       "permissions": [
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.VIBRATE",
-        "android.permission.WAKE_LOCK"
-      ]
+        "android.permission.WAKE_LOCK",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ],
+      "metaData": {
+        "com.google.android.gms.ads.APPLICATION_ID": "ca-app-pub-3940256099942544~3347511713"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -45,6 +51,14 @@
           "icon": "./assets/notification-icon.png",
           "color": "#22c55e",
           "defaultChannel": "default"
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "delayAppMeasurementInit": false
         }
       ]
     ],

@@ -14,12 +14,14 @@ import { NavigationProp } from '@react-navigation/native';
 import { useGroceryStore } from '../store/groceryStore';
 import { RootStackParamList } from '../types';
 import { AlertModal } from '../components/AlertModal';
+import { useInterstitialAd } from '../hooks/useInterstitialAd';
 
 type ProfileScreenNavigationProp = NavigationProp<RootStackParamList>;
 
 export const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<ProfileScreenNavigationProp>();
   const { items, categories, mealPlans, myLists, clearAllData } = useGroceryStore();
+  const { showAd: showInterstitialAd } = useInterstitialAd();
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertConfig, setAlertConfig] = useState<any>({});
 
@@ -64,7 +66,11 @@ export const ProfileScreen: React.FC = () => {
     setAlertConfig({
       title: 'Export Complete',
       message: 'Your lists have been copied to clipboard!',
-      onOk: () => setAlertVisible(false),
+      onOk: () => {
+        setAlertVisible(false);
+        // Show interstitial ad after exporting
+        showInterstitialAd();
+      },
       okText: 'OK',
     });
     setAlertVisible(true);
@@ -83,7 +89,11 @@ export const ProfileScreen: React.FC = () => {
         setAlertConfig({
           title: 'Success',
           message: 'Lists shared successfully!',
-          onOk: () => setAlertVisible(false),
+          onOk: () => {
+            setAlertVisible(false);
+            // Show interstitial ad after sharing
+            showInterstitialAd();
+          },
           okText: 'OK',
         });
         setAlertVisible(true);
