@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { useGroceryStore } from '../store/groceryStore';
 import { RootStackParamList } from '../types';
+import { AlertModal } from '../components/AlertModal';
 
 type EditItemScreenNavigationProp = StackNavigationProp<RootStackParamList, 'EditItem'>;
 type EditItemScreenRouteProp = RouteProp<RootStackParamList, 'EditItem'>;
@@ -35,10 +35,13 @@ export const EditItemScreen: React.FC = () => {
   const [notes, setNotes] = useState(item.notes || '');
   const [lowStockThreshold, setLowStockThreshold] = useState(item.lowStockThreshold?.toString() || '');
   const [isCompleted, setIsCompleted] = useState(item.isCompleted);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   const handleSave = () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter an item name');
+      setAlertMessage('Please enter an item name');
+      setAlertVisible(true);
       return;
     }
 
@@ -54,7 +57,13 @@ export const EditItemScreen: React.FC = () => {
     };
 
     updateItem(item.id, updates);
-    navigation.goBack();
+    
+    // Navigate back immediately
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('MainTabs');
+    }
   };
 
   return (
@@ -145,8 +154,8 @@ export const EditItemScreen: React.FC = () => {
                         : 'bg-gray-100'
                     }`}
                   >
-                    <Text className="text-lg mr-2">{category.icon}</Text>
-                    <Text className={`text-sm font-medium ${
+                    <Ionicons name={category.icon as any} size={16} color={selectedCategory === category.name ? 'white' : category.color} />
+                    <Text className={`text-sm font-medium ml-2 ${
                       selectedCategory === category.name 
                         ? 'text-white' 
                         : 'text-gray-700'
@@ -245,6 +254,14 @@ export const EditItemScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Custom Alert Modal */}
+      <AlertModal
+        visible={alertVisible}
+        title="Error"
+        message={alertMessage}
+        onOk={() => setAlertVisible(false)}
+      />
     </SafeAreaView>
   );
 };

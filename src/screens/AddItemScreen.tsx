@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,6 +14,7 @@ import { RouteProp } from '@react-navigation/native';
 import { useGroceryStore } from '../store/groceryStore';
 import { RootStackParamList } from '../types';
 import { GeminiService } from '../services/geminiService';
+import { AlertModal } from '../components/AlertModal';
 
 type AddItemScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddItem'>;
 type AddItemScreenRouteProp = RouteProp<RootStackParamList, 'AddItem'>;
@@ -33,6 +33,8 @@ export const AddItemScreen: React.FC = () => {
   const [price, setPrice] = useState('');
   const [notes, setNotes] = useState('');
   const [lowStockThreshold, setLowStockThreshold] = useState('');
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   useEffect(() => {
     if (route.params?.category) {
@@ -42,25 +44,19 @@ export const AddItemScreen: React.FC = () => {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter an item name');
+      setAlertMessage('Please enter an item name');
+      setAlertVisible(true);
       return;
     }
 
-    if (!selectedCategory) {
-      // Auto-categorize using AI if no category selected
-      try {
-        const aiCategory = await GeminiService.categorizeItem(name);
-        setSelectedCategory(aiCategory);
-      } catch (error) {
-        setSelectedCategory('Pantry');
-      }
-    }
+    // Use selected category or default to 'Pantry' immediately
+    const finalCategory = selectedCategory || 'Pantry';
 
     const newItem = {
       name: name.trim(),
       quantity: parseInt(quantity) || 1,
       unit: selectedUnit,
-      category: selectedCategory || 'Pantry',
+      category: finalCategory,
       isCompleted: false,
       price: price ? parseFloat(price) : undefined,
       notes: notes.trim() || undefined,
@@ -74,7 +70,12 @@ export const AddItemScreen: React.FC = () => {
       addItem(newItem);
     }
     
-    navigation.goBack();
+    // Navigate back immediately (don't wait for AI)
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('MainTabs');
+    }
   };
 
   return (
@@ -229,6 +230,14 @@ export const AddItemScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Custom Alert Modal */}
+      <AlertModal
+        visible={alertVisible}
+        title="Error"
+        message={alertMessage}
+        onOk={() => setAlertVisible(false)}
+      />
     </SafeAreaView>
   );
 };

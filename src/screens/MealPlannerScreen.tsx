@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +14,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useGroceryStore } from '../store/groceryStore';
 import { RootStackParamList } from '../types';
 import { GeminiService } from '../services/geminiService';
+import { AlertModal } from '../components/AlertModal';
 
 type MealPlannerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MealPlanner'>;
 
@@ -26,6 +26,16 @@ export const MealPlannerScreen: React.FC = () => {
   const [servings, setServings] = useState('4');
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedPresets, setSelectedPresets] = useState<string[]>([]);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<{
+    title: string;
+    message: string;
+    onOk: () => void;
+    onCancel?: () => void;
+    showCancel?: boolean;
+    okText?: string;
+    cancelText?: string;
+  }>({ title: '', message: '', onOk: () => {} });
 
   // Preset meal preferences
   const dietaryPresets = [
@@ -62,7 +72,12 @@ export const MealPlannerScreen: React.FC = () => {
     const finalPreferences = getCombinedPreferences();
     
     if (!finalPreferences) {
-      Alert.alert('Error', 'Please select preferences or enter your own');
+      setAlertConfig({
+        title: 'Error',
+        message: 'Please select preferences or enter your own',
+        onOk: () => setAlertVisible(false),
+      });
+      setAlertVisible(true);
       return;
     }
 
@@ -79,34 +94,50 @@ export const MealPlannerScreen: React.FC = () => {
         });
       }
 
-      Alert.alert(
-        'Success!',
-        `Generated ${result.meals.length} meal plans based on your preferences.`
-      );
-      setPreferences('');
-      setSelectedPresets([]);
+      setAlertConfig({
+        title: 'Success!',
+        message: `Generated ${result.meals.length} meal plans based on your preferences.`,
+        onOk: () => {
+          setAlertVisible(false);
+          setPreferences('');
+          setSelectedPresets([]);
+        },
+      });
+      setAlertVisible(true);
     } catch (error) {
-      Alert.alert('Error', 'Failed to generate meal plan. Please try again.');
+      setAlertConfig({
+        title: 'Error',
+        message: 'Failed to generate meal plan. Please try again.',
+        onOk: () => setAlertVisible(false),
+      });
+      setAlertVisible(true);
     } finally {
       setIsGenerating(false);
     }
   };
 
   const handleAddToGroceryList = (mealPlanId: string) => {
-    Alert.alert(
-      'Add to Grocery List',
-      'This will add all ingredients from this meal plan to your grocery list.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Add',
-          onPress: () => {
-            generateGroceryListFromMeal(mealPlanId);
-            Alert.alert('Success', 'Ingredients added to your grocery list!');
-          },
-        },
-      ]
-    );
+    setAlertConfig({
+      title: 'Add to Grocery List',
+      message: 'This will add all ingredients from this meal plan to your grocery list.',
+      onOk: () => {
+        generateGroceryListFromMeal(mealPlanId);
+        setAlertVisible(false);
+        // Show success message
+        setTimeout(() => {
+          setAlertConfig({
+            title: 'Success',
+            message: 'Ingredients added to your grocery list!',
+            onOk: () => setAlertVisible(false),
+          });
+          setAlertVisible(true);
+        }, 100);
+      },
+      onCancel: () => setAlertVisible(false),
+      showCancel: true,
+      okText: 'Add',
+    });
+    setAlertVisible(true);
   };
 
   const MealPlanCard: React.FC<{ mealPlan: any }> = ({ mealPlan }) => (
@@ -372,6 +403,18 @@ export const MealPlannerScreen: React.FC = () => {
           )}
         </View>
       </ScrollView>
+
+      {/* Custom Alert Modal */}
+      <AlertModal
+        visible={alertVisible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onOk={alertConfig.onOk}
+        onCancel={alertConfig.onCancel}
+        okText={alertConfig.okText}
+        cancelText={alertConfig.cancelText}
+        showCancel={alertConfig.showCancel}
+      />
     </SafeAreaView>
   );
 };

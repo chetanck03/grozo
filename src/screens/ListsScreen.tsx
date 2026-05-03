@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useGroceryStore } from '../store/groceryStore';
 import { GroceryItem } from '../components/GroceryItem';
 import { RootStackParamList } from '../types';
+import { AlertModal } from '../components/AlertModal';
 
 type ListsScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -21,6 +21,15 @@ export const ListsScreen: React.FC = () => {
   const navigation = useNavigation<ListsScreenNavigationProp>();
   const { items, deleteItem } = useGroceryStore();
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<{
+    title: string;
+    message: string;
+    onOk: () => void;
+    onCancel?: () => void;
+    showCancel?: boolean;
+    okText?: string;
+  }>({ title: '', message: '', onOk: () => {} });
 
   const filteredItems = items.filter(item => {
     switch (filter) {
@@ -39,24 +48,42 @@ export const ListsScreen: React.FC = () => {
   const handleClearCompleted = () => {
     const completedItems = items.filter(item => item.isCompleted);
     if (completedItems.length === 0) {
-      Alert.alert('No Items', 'No completed items to clear.');
+      setAlertConfig({
+        title: 'No Items',
+        message: 'No completed items to clear.',
+        onOk: () => setAlertVisible(false),
+      });
+      setAlertVisible(true);
       return;
     }
 
-    Alert.alert(
-      'Clear Completed Items',
-      `Are you sure you want to remove ${completedItems.length} completed items?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: () => {
-            completedItems.forEach(item => deleteItem(item.id));
-          },
-        },
-      ]
-    );
+    setAlertConfig({
+      title: 'Clear Completed Items',
+      message: `Are you sure you want to remove ${completedItems.length} completed items?`,
+      onOk: () => {
+        completedItems.forEach(item => deleteItem(item.id));
+        setAlertVisible(false);
+      },
+      onCancel: () => setAlertVisible(false),
+      showCancel: true,
+      okText: 'Clear',
+    });
+    setAlertVisible(true);
+  };
+
+  const handleDeleteItem = (itemId: string, itemName: string) => {
+    setAlertConfig({
+      title: 'Delete Item',
+      message: `Are you sure you want to delete "${itemName}"?`,
+      onOk: () => {
+        deleteItem(itemId);
+        setAlertVisible(false);
+      },
+      onCancel: () => setAlertVisible(false),
+      showCancel: true,
+      okText: 'Delete',
+    });
+    setAlertVisible(true);
   };
 
   const FilterButton: React.FC<{ 
@@ -143,6 +170,8 @@ export const ListsScreen: React.FC = () => {
               <GroceryItem
                 item={item}
                 onEdit={() => navigation.navigate('EditItem', { item })}
+                showDeleteConfirm={false}
+                onConfirmDelete={() => handleDeleteItem(item.id, item.name)}
               />
             )}
             showsVerticalScrollIndicator={false}
@@ -171,6 +200,17 @@ export const ListsScreen: React.FC = () => {
           </View>
         )}
       </View>
+
+      {/* Custom Alert Modal */}
+      <AlertModal
+        visible={alertVisible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onOk={alertConfig.onOk}
+        onCancel={alertConfig.onCancel}
+        okText={alertConfig.okText}
+        showCancel={alertConfig.showCancel}
+      />
     </SafeAreaView>
   );
 };

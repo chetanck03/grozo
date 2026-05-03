@@ -16,14 +16,24 @@ import { GroceryItem } from '../components/GroceryItem';
 import { CategoryCard } from '../components/CategoryCard';
 import { RootStackParamList, TabParamList } from '../types';
 import { GeminiService } from '../services/geminiService';
+import { AlertModal } from '../components/AlertModal';
 
 type HomeScreenNavigationProp = NavigationProp<RootStackParamList>;
 
 export const HomeScreen: React.FC = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const { items, categories, suggestions, updateSuggestions } = useGroceryStore();
+  const { items, categories, suggestions, updateSuggestions, deleteItem } = useGroceryStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<{
+    title: string;
+    message: string;
+    onOk: () => void;
+    onCancel?: () => void;
+    showCancel?: boolean;
+    okText?: string;
+  }>({ title: '', message: '', onOk: () => {} });
 
   const recentItems = items.slice(-5).reverse();
   const completedCount = items.filter(item => item.isCompleted).length;
@@ -53,6 +63,21 @@ export const HomeScreen: React.FC = () => {
 
   const getCategoryItemCount = (categoryName: string) => {
     return items.filter(item => item.category === categoryName).length;
+  };
+
+  const handleDeleteItem = (itemId: string, itemName: string) => {
+    setAlertConfig({
+      title: 'Delete Item',
+      message: `Are you sure you want to delete "${itemName}"?`,
+      onOk: () => {
+        deleteItem(itemId);
+        setAlertVisible(false);
+      },
+      onCancel: () => setAlertVisible(false),
+      showCancel: true,
+      okText: 'Delete',
+    });
+    setAlertVisible(true);
   };
 
   return (
@@ -163,6 +188,8 @@ export const HomeScreen: React.FC = () => {
                 key={item.id}
                 item={item}
                 onEdit={() => navigation.navigate('EditItem', { item })}
+                showDeleteConfirm={false}
+                onConfirmDelete={() => handleDeleteItem(item.id, item.name)}
               />
             ))}
           </View>
@@ -183,6 +210,17 @@ export const HomeScreen: React.FC = () => {
           ))}
         </View>
       </ScrollView>
+
+      {/* Custom Alert Modal */}
+      <AlertModal
+        visible={alertVisible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onOk={alertConfig.onOk}
+        onCancel={alertConfig.onCancel}
+        okText={alertConfig.okText}
+        showCancel={alertConfig.showCancel}
+      />
     </SafeAreaView>
   );
 };

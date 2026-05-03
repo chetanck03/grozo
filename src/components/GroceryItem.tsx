@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GroceryItem as GroceryItemType } from '../types';
 import { useGroceryStore } from '../store/groceryStore';
@@ -9,9 +9,18 @@ interface Props {
   onEdit?: () => void;
   onToggle?: () => void;
   onDelete?: () => void;
+  showDeleteConfirm?: boolean;
+  onConfirmDelete?: () => void;
 }
 
-export const GroceryItem: React.FC<Props> = ({ item, onEdit, onToggle, onDelete }) => {
+export const GroceryItem: React.FC<Props> = ({ 
+  item, 
+  onEdit, 
+  onToggle, 
+  onDelete,
+  showDeleteConfirm = true,
+  onConfirmDelete 
+}) => {
   const { toggleItemComplete, deleteItem } = useGroceryStore();
 
   const handleToggle = () => {
@@ -25,14 +34,15 @@ export const GroceryItem: React.FC<Props> = ({ item, onEdit, onToggle, onDelete 
   const handleDelete = () => {
     const deleteAction = onDelete || (() => deleteItem(item.id));
     
-    Alert.alert(
-      'Delete Item',
-      `Are you sure you want to delete "${item.name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: deleteAction },
-      ]
-    );
+    if (onConfirmDelete) {
+      // Parent component will handle the confirmation modal
+      onConfirmDelete();
+    } else if (showDeleteConfirm) {
+      // Direct delete without confirmation if parent handles it
+      deleteAction();
+    } else {
+      deleteAction();
+    }
   };
 
   return (

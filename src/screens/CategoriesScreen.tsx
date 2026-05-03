@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,15 +7,40 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useGroceryStore } from '../store/groceryStore';
 import { GroceryItem } from '../components/GroceryItem';
 import { RootStackParamList } from '../types';
+import { AlertModal } from '../components/AlertModal';
 
 type CategoriesScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 export const CategoriesScreen: React.FC = () => {
   const navigation = useNavigation<CategoriesScreenNavigationProp>();
-  const { items, categories } = useGroceryStore();
+  const { items, categories, deleteItem } = useGroceryStore();
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<{
+    title: string;
+    message: string;
+    onOk: () => void;
+    onCancel?: () => void;
+    showCancel?: boolean;
+    okText?: string;
+  }>({ title: '', message: '', onOk: () => {} });
 
   const getItemsByCategory = (categoryName: string) => {
     return items.filter(item => item.category === categoryName);
+  };
+
+  const handleDeleteItem = (itemId: string, itemName: string) => {
+    setAlertConfig({
+      title: 'Delete Item',
+      message: `Are you sure you want to delete "${itemName}"?`,
+      onOk: () => {
+        deleteItem(itemId);
+        setAlertVisible(false);
+      },
+      onCancel: () => setAlertVisible(false),
+      showCancel: true,
+      okText: 'Delete',
+    });
+    setAlertVisible(true);
   };
 
   return (
@@ -71,6 +96,8 @@ export const CategoriesScreen: React.FC = () => {
                     key={item.id}
                     item={item}
                     onEdit={() => navigation.navigate('EditItem', { item })}
+                    showDeleteConfirm={false}
+                    onConfirmDelete={() => handleDeleteItem(item.id, item.name)}
                   />
                 ))
               ) : (
@@ -89,6 +116,17 @@ export const CategoriesScreen: React.FC = () => {
           );
         })}
       </ScrollView>
+
+      {/* Custom Alert Modal */}
+      <AlertModal
+        visible={alertVisible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onOk={alertConfig.onOk}
+        onCancel={alertConfig.onCancel}
+        okText={alertConfig.okText}
+        showCancel={alertConfig.showCancel}
+      />
     </SafeAreaView>
   );
 };

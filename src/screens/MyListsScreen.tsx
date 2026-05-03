@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +14,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { useGroceryStore } from '../store/groceryStore';
 import { GroceryItem } from '../components/GroceryItem';
 import { RootStackParamList } from '../types';
+import { AlertModal } from '../components/AlertModal';
 
 type MyListsScreenNavigationProp = NavigationProp<RootStackParamList>;
 
@@ -35,10 +35,24 @@ export const MyListsScreen: React.FC = () => {
   const [newListName, setNewListName] = useState('');
   const [selectedColor, setSelectedColor] = useState(listColors[0]);
   const [expandedListId, setExpandedListId] = useState<string | null>(null);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<{
+    title: string;
+    message: string;
+    onOk: () => void;
+    onCancel?: () => void;
+    showCancel?: boolean;
+    okText?: string;
+  }>({ title: '', message: '', onOk: () => {} });
 
   const handleCreateList = () => {
     if (!newListName.trim()) {
-      Alert.alert('Error', 'Please enter a list name');
+      setAlertConfig({
+        title: 'Error',
+        message: 'Please enter a list name',
+        onOk: () => setAlertVisible(false),
+      });
+      setAlertVisible(true);
       return;
     }
 
@@ -49,18 +63,33 @@ export const MyListsScreen: React.FC = () => {
   };
 
   const handleDeleteList = (listId: string, listName: string) => {
-    Alert.alert(
-      'Delete List',
-      `Are you sure you want to delete "${listName}"? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => deleteMyList(listId),
-        },
-      ]
-    );
+    setAlertConfig({
+      title: 'Delete List',
+      message: `Are you sure you want to delete "${listName}"? This action cannot be undone.`,
+      onOk: () => {
+        deleteMyList(listId);
+        setAlertVisible(false);
+      },
+      onCancel: () => setAlertVisible(false),
+      showCancel: true,
+      okText: 'Delete',
+    });
+    setAlertVisible(true);
+  };
+
+  const handleDeleteItem = (listId: string, itemId: string, itemName: string) => {
+    setAlertConfig({
+      title: 'Delete Item',
+      message: `Are you sure you want to delete "${itemName}"?`,
+      onOk: () => {
+        removeItemFromMyList(listId, itemId);
+        setAlertVisible(false);
+      },
+      onCancel: () => setAlertVisible(false),
+      showCancel: true,
+      okText: 'Delete',
+    });
+    setAlertVisible(true);
   };
 
   const handleAddItemToList = (listId: string) => {
@@ -143,7 +172,8 @@ export const MyListsScreen: React.FC = () => {
                   <GroceryItem 
                     item={item} 
                     onToggle={() => toggleMyListItemComplete(list.id, item.id)}
-                    onDelete={() => removeItemFromMyList(list.id, item.id)}
+                    showDeleteConfirm={false}
+                    onConfirmDelete={() => handleDeleteItem(list.id, item.id, item.name)}
                     onEdit={() => navigation.navigate('EditItem', { item })}
                   />
                 </View>
@@ -308,6 +338,17 @@ export const MyListsScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Custom Alert Modal */}
+      <AlertModal
+        visible={alertVisible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onOk={alertConfig.onOk}
+        onCancel={alertConfig.onCancel}
+        okText={alertConfig.okText}
+        showCancel={alertConfig.showCancel}
+      />
     </SafeAreaView>
   );
 };
