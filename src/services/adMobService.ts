@@ -1,24 +1,14 @@
 import { Platform } from 'react-native';
 
 // AdMob Configuration
-// Replace these with your actual AdMob Ad Unit IDs from Google AdMob console
+// Production Ad Unit IDs for Android
 export const ADMOB_CONFIG = {
-  // Test Ad Unit IDs (replace with production IDs before publishing)
-  bannerAdUnitId: Platform.select({
-    ios: 'ca-app-pub-3940256099942544/2934735716', // Test banner ID for iOS
-    android: 'ca-app-pub-3940256099942544/6300978111', // Test banner ID for Android
-    default: 'ca-app-pub-3940256099942544/6300978111',
-  }),
-  interstitialAdUnitId: Platform.select({
-    ios: 'ca-app-pub-3940256099942544/4411468910', // Test interstitial ID for iOS
-    android: 'ca-app-pub-3940256099942544/1033173712', // Test interstitial ID for Android
-    default: 'ca-app-pub-3940256099942544/1033173712',
-  }),
-  appId: Platform.select({
-    ios: 'ca-app-pub-3940256099942544~1458002511', // Test App ID for iOS
-    android: 'ca-app-pub-3940256099942544~3347511713', // Test App ID for Android
-    default: 'ca-app-pub-3940256099942544~3347511713',
-  }),
+  // Android Ad Unit IDs (your production IDs)
+  bannerAdUnitId: 'ca-app-pub-9236732680797508/4746287184',
+  interstitialAdUnitId: 'ca-app-pub-9236732680797508/6188503005',
+  appId: 'ca-app-pub-9236732680797508~3215169935',
+  // Enable ads on all platforms
+  adsEnabled: true,
 };
 
 // Ad display intervals (in milliseconds)

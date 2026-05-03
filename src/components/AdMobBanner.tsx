@@ -14,6 +14,11 @@ export const AdMobBanner: React.FC<AdMobBannerProps> = ({
 }) => {
   const [hasError, setHasError] = useState(false);
 
+  // Show ads on all platforms if enabled
+  if (!ADMOB_CONFIG.adsEnabled) {
+    return null;
+  }
+
   const adUnitId = unitId || ADMOB_CONFIG.bannerAdUnitId;
 
   useEffect(() => {

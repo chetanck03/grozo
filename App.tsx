@@ -18,10 +18,10 @@ export default function App() {
     // Initialize AdMob
     mobileAds()
       .initialize()
-      .then((adapterStatuses) => {
+      .then((adapterStatuses: any) => {
         console.log('AdMob initialized:', adapterStatuses);
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.log('AdMob initialization error:', error);
       });
     
