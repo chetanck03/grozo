@@ -49,7 +49,45 @@ export class GeminiService {
   static async generateMealPlan(preferences: string, servings: number = 4): Promise<{
     meals: Array<{ name: string; ingredients: string[]; description: string }>;
   }> {
-    const prompt = `Create a weekly meal plan for ${servings} people with these preferences: ${preferences}. Return 7 meals in this exact JSON format without any markdown formatting:
+    // Check for dietary restrictions
+    const isVegetarian = preferences.toLowerCase().includes('vegetarian') && !preferences.toLowerCase().includes('vegan');
+    const isVegan = preferences.toLowerCase().includes('vegan');
+    const isKeto = preferences.toLowerCase().includes('keto');
+    const isGlutenFree = preferences.toLowerCase().includes('gluten-free') || preferences.toLowerCase().includes('gluten free');
+    const isDairyFree = preferences.toLowerCase().includes('dairy-free') || preferences.toLowerCase().includes('dairy free');
+    
+    let dietaryRestriction = '';
+    if (isVegan) {
+      dietaryRestriction = 'STRICTLY VEGAN - NO animal products whatsoever (no meat, fish, dairy, eggs, honey, or any animal-derived ingredients)';
+    } else if (isVegetarian) {
+      dietaryRestriction = 'STRICTLY VEGETARIAN - NO meat, fish, or seafood. Dairy and eggs are allowed.';
+    }
+    
+    if (isKeto) {
+      dietaryRestriction += (dietaryRestriction ? ' AND ' : '') + 'KETO - Low carb, high fat. NO grains, NO sugar, NO starchy vegetables (potatoes, corn). Focus on meat, fish, eggs, cheese, avocados, nuts.';
+    }
+    
+    if (isGlutenFree) {
+      dietaryRestriction += (dietaryRestriction ? ' AND ' : '') + 'GLUTEN-FREE - NO wheat, barley, rye, or any gluten-containing ingredients. Use rice, quinoa, or gluten-free alternatives.';
+    }
+    
+    if (isDairyFree) {
+      dietaryRestriction += (dietaryRestriction ? ' AND ' : '') + 'DAIRY-FREE - NO milk, cheese, butter, cream, yogurt, or any dairy products.';
+    }
+    
+    const prompt = `Create a weekly meal plan for ${servings} people with these preferences: ${preferences}.
+
+${dietaryRestriction ? `IMPORTANT DIETARY RESTRICTION: ${dietaryRestriction}
+
+` : `DIETARY TYPE: No restrictions - You CAN include meat, chicken, fish, seafood, dairy, and all other ingredients.
+
+`}
+CRITICAL RULES:
+${isVegetarian || isVegan ? '- You MUST NOT include ANY meat, chicken, beef, pork, fish, seafood, or any animal flesh\n' : (!isVegetarian && !isVegan ? '- You CAN include meat, chicken, beef, pork, fish, seafood, and other animal products\n' : '')}${isVegan ? '- You MUST NOT include ANY dairy products (milk, cheese, butter, cream), eggs, or honey\n' : ''}${isKeto ? '- You MUST NOT include ANY grains, sugar, bread, pasta, rice, potatoes, or high-carb foods\n' : ''}${isGlutenFree ? '- You MUST NOT include ANY wheat, barley, rye, or gluten-containing ingredients\n' : ''}${isDairyFree ? '- You MUST NOT include ANY milk, cheese, butter, cream, yogurt, or dairy products\n' : ''}- Every single ingredient MUST comply with the dietary restrictions above
+- Double-check each ingredient before including it
+- If you're unsure about an ingredient, exclude it
+
+Return 7 meals in this exact JSON format without any markdown formatting:
 {
   "meals": [
     {
@@ -85,26 +123,72 @@ Focus on practical, common ingredients that are easy to find in grocery stores.`
       return JSON.parse(cleanedResponse);
     } catch (error) {
       console.error('Error generating meal plan:', error);
-      // Return fallback meal plan
-      return {
-        meals: [
-          {
-            name: "Simple Pasta",
-            description: "Quick and easy pasta dish",
-            ingredients: ["pasta", "tomato sauce", "cheese", "garlic", "olive oil"]
-          },
-          {
-            name: "Chicken Stir Fry",
-            description: "Healthy chicken and vegetable stir fry",
-            ingredients: ["chicken breast", "mixed vegetables", "soy sauce", "rice", "ginger"]
-          },
-          {
-            name: "Vegetable Soup",
-            description: "Nutritious vegetable soup",
-            ingredients: ["mixed vegetables", "vegetable broth", "onion", "garlic", "herbs"]
-          }
-        ]
-      };
+      // Return fallback meal plan based on dietary preferences
+      const isVegetarian = preferences.toLowerCase().includes('vegetarian') && !preferences.toLowerCase().includes('vegan');
+      const isVegan = preferences.toLowerCase().includes('vegan');
+      
+      if (isVegan) {
+        return {
+          meals: [
+            {
+              name: "Vegan Buddha Bowl",
+              description: "Nutritious bowl with quinoa, roasted vegetables, and tahini dressing",
+              ingredients: ["quinoa", "sweet potato", "chickpeas", "kale", "tahini", "lemon", "olive oil"]
+            },
+            {
+              name: "Vegan Lentil Curry",
+              description: "Hearty and flavorful lentil curry with coconut milk",
+              ingredients: ["red lentils", "coconut milk", "onion", "garlic", "curry powder", "tomatoes", "rice"]
+            },
+            {
+              name: "Vegan Pasta Primavera",
+              description: "Fresh vegetable pasta with garlic and olive oil",
+              ingredients: ["pasta", "bell peppers", "zucchini", "cherry tomatoes", "garlic", "olive oil", "basil"]
+            }
+          ]
+        };
+      } else if (isVegetarian) {
+        return {
+          meals: [
+            {
+              name: "Vegetable Stir Fry with Tofu",
+              description: "Colorful vegetable stir fry with crispy tofu",
+              ingredients: ["tofu", "broccoli", "bell peppers", "carrots", "soy sauce", "ginger", "rice"]
+            },
+            {
+              name: "Cheese Quesadillas",
+              description: "Crispy quesadillas with melted cheese and vegetables",
+              ingredients: ["tortillas", "cheddar cheese", "bell peppers", "onion", "sour cream", "salsa"]
+            },
+            {
+              name: "Vegetable Pasta Bake",
+              description: "Baked pasta with vegetables and cheese",
+              ingredients: ["pasta", "mozzarella cheese", "tomato sauce", "zucchini", "spinach", "garlic"]
+            }
+          ]
+        };
+      } else {
+        // Non-vegetarian fallback
+        return {
+          meals: [
+            {
+              name: "Simple Pasta",
+              description: "Quick and easy pasta dish",
+              ingredients: ["pasta", "tomato sauce", "cheese", "garlic", "olive oil"]
+            },
+            {
+              name: "Chicken Stir Fry",
+              description: "Healthy chicken and vegetable stir fry",
+              ingredients: ["chicken breast", "mixed vegetables", "soy sauce", "rice", "ginger"]
+            },
+            {
+              name: "Vegetable Soup",
+              description: "Nutritious vegetable soup",
+              ingredients: ["mixed vegetables", "vegetable broth", "onion", "garlic", "herbs"]
+            }
+          ]
+        };
+      }
     }
   }
 
