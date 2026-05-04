@@ -14,7 +14,7 @@ Grozo is a modern mobile app that makes grocery shopping effortless and organize
 **Simple & Intuitive** - Clean design that anyone can use  
 **Family Friendly** - Share lists and coordinate shopping with family  
 **Never Forget** - Smart reminders for low stock and shopping trips  
-**Stay Organized** - Category-based organization with progress tracking  
+**Stay Organized** - Category-based organization with progress tracking!  
 
 ## App Screenshots
 
