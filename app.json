@@ -20,7 +20,7 @@
       "bundleIdentifier": "com.grozo.smartlist",
       "infoPlist": {
         "NSUserNotificationsUsageDescription": "This app uses notifications to remind you about low stock items and shopping reminders.",
-        "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511"
+        "GADApplicationIdentifier": "ca-app-pub-9236732680797508~7703556779"
       }
     },
     "android": {
@@ -37,7 +37,7 @@
         "android.permission.ACCESS_NETWORK_STATE"
       ],
       "metaData": {
-        "com.google.android.gms.ads.APPLICATION_ID": "ca-app-pub-9236732680797508~3215169935"
+        "com.google.android.gms.ads.APPLICATION_ID": "ca-app-pub-9236732680797508~7703556779"
       }
     },
     "web": {
@@ -56,17 +56,17 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-9236732680797508~3215169935",
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "androidAppId": "ca-app-pub-9236732680797508~7703556779",
+          "iosAppId": "ca-app-pub-9236732680797508~7703556779",
           "delayAppMeasurementInit": false
         }
       ]
     ],
     "extra": {
       "eas": {
-        "projectId": "862659b2-93ba-4111-b1f4-238218be63db"
+        "projectId": "a117dccb-0ee1-41a9-bd7f-35266854927a"
       }
     },
-    "owner": "dev-ck"
+    "owner": ""
   }
 }

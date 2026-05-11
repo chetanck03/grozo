@@ -4,9 +4,9 @@ import { Platform } from 'react-native';
 // Production Ad Unit IDs for Android
 export const ADMOB_CONFIG = {
   // Android Ad Unit IDs (your production IDs)
-  bannerAdUnitId: 'ca-app-pub-9236732680797508/4746287184',
-  interstitialAdUnitId: 'ca-app-pub-9236732680797508/6188503005',
-  appId: 'ca-app-pub-9236732680797508~3215169935',
+  bannerAdUnitId: 'ca-app-pub-9236732680797508/9290531226',
+  interstitialAdUnitId: 'ca-app-pub-9236732680797508/5207431543',
+  appId: 'ca-app-pub-9236732680797508~7703556779',
   // Enable ads on all platforms
   adsEnabled: true,
 };
